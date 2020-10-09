@@ -1,4 +1,8 @@
 import javax.swing.*;
+
+import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
+
 import java.awt.*;
 
 import java.io.BufferedReader;
@@ -46,6 +50,9 @@ public class BasicFileReader {
 	}
 	
 	public BasicFileReader(){
+		XStream xStream = new XStream(new DomDriver()); // does not require XPP3 library
+		xStream.alias("note", Note.class);
+		
 		//JComponents
 		JLabel fileTextLabel = new JLabel("File Text");
 		fileTextLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -75,7 +82,9 @@ public class BasicFileReader {
 		//Action listeners
 		//openFile -> set fileText to content of fileNameField, calling method readFromFile
 		openFile.addActionListener((e) -> {
-			String content = readFromFile(fileNameField.getText().trim());
+			String xmlNote = readFromFile(fileNameField.getText().trim());
+			Note note = (Note) xStream.fromXML(xmlNote);
+			String content = note.getContent();
 			fileText.setText(content);
 	      });
 		
@@ -85,8 +94,10 @@ public class BasicFileReader {
 		 * */
 		saveToFile.addActionListener(e -> {
 			String content = fileText.getText();
+			Note note = new Note(content);
+			String xmlNote = xStream.toXML(note);
 			String fileName = fileNameField.getText().trim();
-			writeToFile(fileName, content);
+			writeToFile(fileName, xmlNote);
 		});
 		
 		JFrame frame = new JFrame();
