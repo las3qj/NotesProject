@@ -1,20 +1,50 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.util.*;
-import java.util.List;
-import java.util.stream.Stream;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 
 public class BasicFileReader {
 
-	public void readFromFile(String fileName) {
-		
+	//method relegated to read and return the contents from fileName 
+	public String readFromFile(String fileName) {
+		BufferedReader br = null;
+		String content = "";
+		try {
+			br = new BufferedReader(new FileReader(fileName));
+			String contentLine = br.readLine();
+			while (contentLine != null) {
+				content = content + contentLine + "\n";
+				contentLine = br.readLine();
+			}
+		} catch (IOException ioe){
+			content = "Error loading file";
+			} 
+		return content;
 	}
+	
+	//method relegated to write the string [content] to [fileName]
+	public static boolean writeToFile(String fileName, String content) {
+		try {
+		      File myObj = new File(fileName);
+		      if (!myObj.exists()) {
+		    	  myObj.createNewFile();
+		      }
+		      FileWriter myWriter = new FileWriter(myObj);
+		      myWriter.write(content);
+		      myWriter.close();
+		      return true;
+		    } catch (IOException e) {
+		      System.out.println("An error occurred.");
+		      e.printStackTrace();
+		      return false;
+		    }
+	}
+	
 	public BasicFileReader(){
 		//JComponents
 		JLabel fileTextLabel = new JLabel("File Text");
@@ -29,10 +59,12 @@ public class BasicFileReader {
 		JTextField fileNameField = new JTextField(20);
 		fileNameField.setText("examplefilename.txt");
 		JButton openFile = new JButton("Open File");
+		JButton saveToFile = new JButton("Save File");
 		
 		JPanel fileChoosePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		fileChoosePanel.add(fileNameField);
 		fileChoosePanel.add(openFile);
+		fileChoosePanel.add(saveToFile);
 		
 		JPanel fileReaderPanel = new JPanel();
 		fileReaderPanel.setLayout(new BorderLayout());
@@ -41,23 +73,21 @@ public class BasicFileReader {
 		fileReaderPanel.add(fileChoosePanel, BorderLayout.SOUTH);
 		
 		//Action listeners
-		//openFile -> set fileText to content of fileNameField
+		//openFile -> set fileText to content of fileNameField, calling method readFromFile
 		openFile.addActionListener((e) -> {
-			BufferedReader br = null;
-			String content = "";
-			try {
-				br = new BufferedReader(new FileReader(fileNameField.getText()));
-				String contentLine = br.readLine();
-				while (contentLine != null) {
-					content = content + contentLine + "\n";
-					contentLine = br.readLine();
-				}
-			} catch (IOException ioe){
-				content = "Error loading file";
-				} 
+			String content = readFromFile(fileNameField.getText().trim());
 			fileText.setText(content);
-			
 	      });
+		
+		/*saveToFile -> save content of fileText to file titled [fileNameField] 
+		 * if fileNameField exists, overwrite
+		 * else, create new file entitled [fileNameField]
+		 * */
+		saveToFile.addActionListener(e -> {
+			String content = fileText.getText();
+			String fileName = fileNameField.getText().trim();
+			writeToFile(fileName, content);
+		});
 		
 		JFrame frame = new JFrame();
 	    frame.setTitle("Basic File Reader");
