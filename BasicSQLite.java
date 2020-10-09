@@ -73,7 +73,33 @@ public class BasicSQLite {
     }
 	
 	/**
-     * select all rows in the warehouses table
+     * Update data of a warehouse specified by the id
+     *
+     * @param name name of the category
+     * @param tag1 first tag in the category
+     * @param tag2 second tag in the category
+     */
+    public void update(String name, String tag1, String tag2) {
+        String sql = "UPDATE categories SET tag1 = ? , "
+                + "tag2 = ? "
+                + "WHERE name = ?";
+
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            pstmt.setString(1, tag1);
+            pstmt.setString(2, tag2);
+            pstmt.setString(3, name);
+            // update 
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+	
+	/**
+     * select all rows in the categories table
      */
     public void selectAll(){
         String sql = "SELECT name, tag1, tag2 FROM categories";
@@ -92,6 +118,27 @@ public class BasicSQLite {
             System.out.println(e.getMessage());
         }
     }
+    
+    /**
+     * Delete a category specified by the name
+     *
+     * @param name
+     */
+    public void delete(String name) {
+        String sql = "DELETE FROM categories WHERE name = ?";
+
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            pstmt.setString(1, name);
+            // execute the delete statement
+            pstmt.executeUpdate();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 
     /**
      * @param args the command line arguments
@@ -99,12 +146,24 @@ public class BasicSQLite {
     public static void main(String[] args) {
     	 createNewTable();
     	 BasicSQLite sQLite = new BasicSQLite();
+    	 
          // insert three new rows
     	 /*
-         sQLite.insert("Author", "Nietzsche", "Rorty");
+         sQLite.insert("Author", "Neetche", "Rorty");
          sQLite.insert("Type", "Quotation", "Paraphrase");
-         sQLite.insert("Theme", "Language", "Creation"); */
+         sQLite.insert("Theme", "Language", "Creation"); 
+         
+    	 sQLite.selectAll();
+    	 // update authors
+    	 sQLite.update("Author", "Nietzsche", "Rorty");
+    	 */
+    	 
+    	 /*
+    	 sQLite.insert("Autour", "Neetche", "Rotty");
     	 sQLite.selectAll();
     	 
+    	 sQLite.delete("Autour");
+    	 sQLite.selectAll();
+    	 */
     }
 }
