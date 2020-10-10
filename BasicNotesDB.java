@@ -29,7 +29,7 @@ public class BasicNotesDB {
      *
      * @param fileName the database file name
      */
-	public void createNewTables() {
+	private void createNewTables() {
         // SQLite connection string
         //String url = "jdbc:sqlite:C://sqlite/db/basicnotes.db";
         
@@ -42,7 +42,7 @@ public class BasicNotesDB {
         // SQL statement for creating a new table -- notes
         String sql2 = "CREATE TABLE IF NOT EXISTS notes (\n"
         		+ " id integer PRIMARY KEY, \n"
-        		+ "quote text, \n"
+        		+ "note text, \n"
         		+ "tag1 text, \n"
         		+ "tag2 text \n"
         		+ ");";
@@ -57,7 +57,7 @@ public class BasicNotesDB {
         }
     }
 	
-	//Categories methods
+	//Private Categories methods
 	/**
      * Insert a new category into the categories table
      *
@@ -65,7 +65,7 @@ public class BasicNotesDB {
      * @param tag1
      * @param tag2
      */
-	public void insertCategory(String name, String tag1, String tag2) {
+	private void insertCategory(String name, String tag1, String tag2) {
         String sql = "INSERT INTO categories(name,tag1,tag2) VALUES(?,?,?)";
 
         try (Connection conn = this.connect();
@@ -86,7 +86,7 @@ public class BasicNotesDB {
      * @param tag1 first tag in the category
      * @param tag2 second tag in the category
      */
-    public void updateCategory(String name, String tag1, String tag2) {
+    private void updateCategory(String name, String tag1, String tag2) {
         String sql = "UPDATE categories SET tag1 = ? , "
                 + "tag2 = ? "
                 + "WHERE name = ?";
@@ -108,7 +108,7 @@ public class BasicNotesDB {
     /**
      * select all rows in the categories table
      */
-    public void selectAllCategories(){
+    private void selectAllCategories(){
         String sql = "SELECT name, tag1, tag2 FROM categories";
         
         try (Connection conn = this.connect();
@@ -131,7 +131,7 @@ public class BasicNotesDB {
      *
      * @param name
      */
-    public void deleteCategory(String name) {
+    private void deleteCategory(String name) {
         String sql = "DELETE FROM categories WHERE name = ?";
 
         try (Connection conn = this.connect();
@@ -147,6 +147,20 @@ public class BasicNotesDB {
         }
     }
 
+    /**
+     * Delete the category table
+     **/
+    private void deleteCategories() {
+    	String sql = "DROP TABLE IF EXISTS categories";
+    	
+    	try (Connection conn = this.connect();
+    			Statement stmt = conn.createStatement()) {
+    		stmt.execute(sql);
+    	}	catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
     //Notes methods
 	/**
      * Insert a new note into the notes table
@@ -156,7 +170,7 @@ public class BasicNotesDB {
      * @param tag1
      * @param tag2
      */
-    public void insertNote(int id, String note, String tag1, String tag2) {
+    private void insertNote(int id, String note, String tag1, String tag2) {
         String sql = "INSERT INTO notes(id,note,tag1,tag2) VALUES(?,?,?,?)";
 
         try (Connection conn = this.connect();
@@ -178,7 +192,7 @@ public class BasicNotesDB {
      * @param tag1 first tag in the category
      * @param tag2 second tag in the category
      */
-    public void updateNote(int id, String note, String tag1, String tag2) {
+    private void updateNote(int id, String note, String tag1, String tag2) {
         String sql = "UPDATE notes SET note = ?"
         		+ "tag1 = ? , "
                 + "tag2 = ? "
@@ -202,7 +216,7 @@ public class BasicNotesDB {
     /**
      * select all rows in the notes table
      */
-    public void selectAllNotes(){
+    private void selectAllNotes(){
         String sql = "SELECT id, note, tag1, tag2 FROM notes";
         
         try (Connection conn = this.connect();
@@ -226,7 +240,7 @@ public class BasicNotesDB {
      *
      * @param id
      */
-    public void deleteNote(int id) {
+    private void deleteNote(int id) {
         String sql = "DELETE FROM notes WHERE id = ?";
 
         try (Connection conn = this.connect();
@@ -242,4 +256,52 @@ public class BasicNotesDB {
         }
     }
 
+    /**
+     * Clear the note table
+     **/
+    private void deleteNotes() {
+    	String sql = "DROP TABLE IF EXISTS notes";
+    	
+    	try (Connection conn = this.connect();
+    			Statement stmt = conn.createStatement()) {
+    		stmt.execute(sql);
+    	}	catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    //Public methods
+    /**
+     * Inserts a new note into notes after creating an id
+     * 
+     * @param note
+     * @param tag1
+     * @param tag2
+     */
+    public void publishNote(String note, String tag1, String tag2) {
+    	String sql1 = "SELECT COUNT(*) FROM notes";
+    	int id = 1;
+    	
+    	try (Connection conn = this.connect();
+                Statement stmt  = conn.createStatement();
+                ResultSet rs    = stmt.executeQuery(sql1)){
+    		id += rs.getInt(1);
+            
+           } catch (SQLException e) {
+               System.out.println(e.getMessage());
+           }
+    	insertNote(id, note, tag1, tag2);
+    }
+    
+    /**
+     * Deletes current tables and creates new, empty ones
+     **/
+    public void reset() {
+    	deleteCategories();
+    	deleteNotes();
+    	createNewTables();
+    }
+
+    //From here we need to determine how exactly the app will interact with this database interface
+    //i.e. we really need to spend some time working on creating the design of the app
 }
