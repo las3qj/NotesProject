@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Vector;
 
 public class BasicNotesDB {
 	/**
@@ -294,6 +295,50 @@ public class BasicNotesDB {
     }
     
     /**
+     * Returns a vector containing all category names in categories
+     **/
+    public Vector<String> getCategoryNames(){
+        String sql = "SELECT name FROM categories";
+        Vector<String> results = new Vector<String>();
+        try (Connection conn = this.connect();
+             Statement stmt  = conn.createStatement();
+             ResultSet rs    = stmt.executeQuery(sql)){
+            
+            // loop through the result set
+            while (rs.next()) {
+                results.add(rs.getString("name"));
+            }
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return results;
+    }
+    
+    /**
+     * Returns a vector containing all tags from the given category
+     * @param name name of the category
+     * @return
+     */
+    public Vector<String> getCategoryTags(String name){
+    	String sql = "select tag1, tag2 from categories where name = ?";
+    	Vector<String> results = new Vector<String>();
+        try (Connection conn = this.connect();
+        		PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            	pstmt.setString(1, name);
+            	ResultSet rs    = pstmt.executeQuery();
+                // loop through the result set
+                while (rs.next()) {
+                    results.add(rs.getString("tag1"));
+                    results.add(rs.getString("tag2"));
+                }                
+               
+           } catch (SQLException e) {
+               System.out.println(e.getMessage());
+           }
+    	return results;
+    }
+    
+    /**
      * Deletes current tables and creates new, empty ones
      **/
     public void reset() {
@@ -302,6 +347,11 @@ public class BasicNotesDB {
     	createNewTables();
     }
 
+    public void testCategories() {
+    	insertCategory("Author", "Nietzsche", "Rorty");
+    	insertCategory("Content", "Quote", "Thought");
+    	insertCategory("Genre", "Philosophy", "TV");
+    }
     //From here we need to determine how exactly the app will interact with this database interface
     //i.e. we really need to spend some time working on creating the design of the app
 }
