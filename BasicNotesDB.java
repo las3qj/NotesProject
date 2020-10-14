@@ -272,27 +272,17 @@ public class BasicNotesDB {
     }
 
     //Public methods
+    
     /**
-     * Inserts a new note into notes after creating an id
-     * 
-     * @param note
-     * @param tag1
-     * @param tag2
-     */
-    public void publishNote(String note, String tag1, String tag2) {
-    	String sql1 = "SELECT COUNT(*) FROM notes";
-    	int id = 1;
-    	
-    	try (Connection conn = this.connect();
-                Statement stmt  = conn.createStatement();
-                ResultSet rs    = stmt.executeQuery(sql1)){
-    		id += rs.getInt(1);
-            
-           } catch (SQLException e) {
-               System.out.println(e.getMessage());
-           }
-    	insertNote(id, note, tag1, tag2);
+     * Deletes current tables and creates new, empty ones
+     **/
+    public void reset() {
+    	deleteCategories();
+    	deleteNotes();
+    	createNewTables();
     }
+    
+    //-Public category methods
     
     /**
      * Returns a vector containing all category names in categories
@@ -337,20 +327,74 @@ public class BasicNotesDB {
            }
     	return results;
     }
-    
-    /**
-     * Deletes current tables and creates new, empty ones
-     **/
-    public void reset() {
-    	deleteCategories();
-    	deleteNotes();
-    	createNewTables();
-    }
 
+    /**
+     * Creates test categories
+     */
     public void testCategories() {
     	insertCategory("Author", "Nietzsche", "Rorty");
     	insertCategory("Content", "Quote", "Thought");
     	insertCategory("Genre", "Philosophy", "TV");
+    }
+    
+    //-Public note methods
+    
+    /**
+     * Inserts a new note into notes after creating an id
+     * 
+     * @param note
+     * @param tag1
+     * @param tag2
+     */
+    public void publishNote(String note, String tag1, String tag2) {
+    	String sql1 = "SELECT COUNT(*) FROM notes";
+    	int id = 1;
+    	
+    	try (Connection conn = this.connect();
+                Statement stmt  = conn.createStatement();
+                ResultSet rs    = stmt.executeQuery(sql1)){
+    		id += rs.getInt(1);
+            
+           } catch (SQLException e) {
+               System.out.println(e.getMessage());
+           }
+    	insertNote(id, note, tag1, tag2);
+    }
+    
+    /**
+     * Returns all notes corresponding to the requested tag
+     * @param tag String representing a tag in the dataBase
+     * @return a vector of the 'note' contents of every note with tag1 or tag2 'tag'
+     */
+    public Vector<String> getNotesFromTag(String tag){
+    	String sql = "select note from notes where tag1 = ? or tag2 = ?";
+    	Vector<String> results = new Vector<String>();
+        try (Connection conn = this.connect();
+        		PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            	pstmt.setString(1, tag);
+            	pstmt.setString(2, tag);
+            	ResultSet rs    = pstmt.executeQuery();
+                // loop through the result set
+                while (rs.next()) {
+                    results.add(rs.getString("note"));
+                }                
+               
+           } catch (SQLException e) {
+               System.out.println(e.getMessage());
+           }
+    	return results;
+
+    }
+    
+    public void testNotes() {
+    	insertNote(1, "all concepts in which an entire /nprocess is semiotically summarized elude /ndefinition;"
+    			+ " only that which has no history is definable", "Nietzsche", "Quote");
+    	insertNote(2, "Rather, he saw self-knowledge as self-creation. The process of coming to know oneself,"
+    			+ " confronting one's contingency, tracking one's causes home, is identical with the process"
+    			+ "of inventing a new language -- that is, of thinking up some new metaphors.", "Quote", "Rorty");
+    	insertNote(3, "Nietzsche does not argue that truth does not exist, but merely that truth is not *out there*"
+    			+ " -- that is, there is no truth beyond our interpretations. Truth is multiple, perspectival", 
+    			"Philosophy","Nietzsche");
     }
     //From here we need to determine how exactly the app will interact with this database interface
     //i.e. we really need to spend some time working on creating the design of the app

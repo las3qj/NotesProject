@@ -16,7 +16,7 @@ public class BasicNotes {
 		/*Vector<String> tags = dataBase.getCategoryTags("Content");
 		for(int i=0; i<tags.size(); i++)
 			System.out.println(tags.get(i));*/
-		
+		//dataBase.testNotes();
 		
 		try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
