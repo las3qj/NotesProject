@@ -11,12 +11,12 @@ public class BasicNotes {
 		BasicNotesDB dataBase = new BasicNotesDB();
 		
 		//hard reset the tables
-		//dataBase.reset();
-		//dataBase.testCategories();
+		dataBase.reset();
+		dataBase.testCategories();
 		/*Vector<String> tags = dataBase.getCategoryTags("Content");
 		for(int i=0; i<tags.size(); i++)
 			System.out.println(tags.get(i));*/
-		//dataBase.testNotes();
+		dataBase.testNotes();
 		
 		try {
             UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");

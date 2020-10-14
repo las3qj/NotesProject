@@ -42,7 +42,7 @@ public class BasicNotesDB {
                 + ");";
         // SQL statement for creating a new table -- notes
         String sql2 = "CREATE TABLE IF NOT EXISTS notes (\n"
-        		+ " id integer PRIMARY KEY, \n"
+        		+ "id integer PRIMARY KEY, \n"
         		+ "note text, \n"
         		+ "tag1 text, \n"
         		+ "tag2 text \n"
@@ -364,12 +364,12 @@ public class BasicNotesDB {
     /**
      * Returns all notes corresponding to the requested tag
      * @param tag String representing a tag in the dataBase
-     * @return a vector of the 'note' contents of every note with tag1 or tag2 'tag'
-     * returns the empty string if no notes correspond to this tag
+     * @return a vector of the Note class representation of every note with tag1 or tag2 'tag'
+     * returns empty vector if no notes correspond to this tag
      */
-    public Vector<String> getNotesFromTag(String tag){
-    	String sql = "select note from notes where tag1 = ? or tag2 = ?";
-    	Vector<String> results = new Vector<String>();
+    public Vector<Note> getNotesFromTag(String tag){
+    	String sql = "select id, note, tag1, tag2 from notes where tag1 = ? or tag2 = ?";
+    	Vector<Note> results = new Vector<Note>();
         try (Connection conn = this.connect();
         		PreparedStatement pstmt = conn.prepareStatement(sql)) {
             	pstmt.setString(1, tag);
@@ -377,19 +377,35 @@ public class BasicNotesDB {
             	ResultSet rs    = pstmt.executeQuery();
                 // loop through the result set
                 while (rs.next()) {
-                    results.add(rs.getString("note"));
+                    results.add(new Note(rs.getString("note"),rs.getInt("id"),rs.getString("tag1"),rs.getString("tag2")));
                 }
-                results.add("");
                
            } catch (SQLException e) {
                System.out.println(e.getMessage());
            }
     	return results;
-
     }
     
+    /**
+     * Find all notes of all tags within a given category - calls getCategoryTags(cat) and getNotesFromTag() for all tags
+     * 
+     * @param cat is a string representing the category to pull notes corresponding to
+     * @return A Vector<String> of all notes with a tag in the given category
+     */
+    public Vector<Note> getNotesFromCategory(String cat){
+    	Vector<String> tags = new Vector<String>();
+    	tags = getCategoryTags(cat);
+    	Vector<Note> notes = new Vector<Note>();
+    	for(int i=0; i<tags.size(); i++) {
+    		notes.addAll(this.getNotesFromTag(tags.get(i)));
+    	}
+    	return notes;
+    }
+    
+
+    
     public void testNotes() {
-    	insertNote(1, "all concepts in which an entire /nprocess is semiotically summarized elude /ndefinition;"
+    	insertNote(1, "all concepts in which an entire process is semiotically summarized elude definition;"
     			+ " only that which has no history is definable", "Nietzsche", "Quote");
     	insertNote(2, "Rather, he saw self-knowledge as self-creation. The process of coming to know oneself,"
     			+ " confronting one's contingency, tracking one's causes home, is identical with the process"
@@ -397,6 +413,15 @@ public class BasicNotesDB {
     	insertNote(3, "Nietzsche does not argue that truth does not exist, but merely that truth is not *out there*"
     			+ " -- that is, there is no truth beyond our interpretations. Truth is multiple, perspectival", 
     			"Philosophy","Nietzsche");
+    	insertNote(4, "What, then, is truth? A mobile army of metaphors, metonyms, and anthropomorphisms--in short,"
+    			+ "a sum of human relations, which have been enhanced, transposed, and embellished poetically and "
+    			+ "rhetoircally, and which after long use seem firm, canonical, and obligatory to a people: truths"
+    			+ " are illusions about which one has forgotten that this is what they are; metaphors which are"
+    			+ " worn out and without sensuous power; coins which have lost their pictures and now matter only as"
+    			+ "metal, no longer as coins", "Quote", "Nietzsche");
+    	insertNote(5, "Every great human being has a retroactive force: all history is again placed in the scales for"
+    			+ " his sake, and a thousand secrets of the past crawl out of their hideouts--into his sun.", "Nietzsche",
+    			"Quote");
     }
     //From here we need to determine how exactly the app will interact with this database interface
     //i.e. we really need to spend some time working on creating the design of the app

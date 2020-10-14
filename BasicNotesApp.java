@@ -7,15 +7,15 @@ import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Vector;
 
 import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 /**
@@ -25,15 +25,18 @@ import javax.swing.tree.TreeSelectionModel;
  * [X] 2. Create a formatting system for the displayed note to fit into a horizontal constraint
  * [X] 3. Allow multiple notes to display when a tag is selected
  * [X] 4. Allow a category to be selected, displaying all notes from that category
- * 5. Allow multiple tags to be selected, or even multiple categories
- * 6. Determine the nature of the double-click requirement
- * 7. Allow a category to be selected
+ * [X] 4.b Allow a scrolling pane for notes while maintaining unity of size between notes
+ * [X] 5. Allow multiple tags to be selected, or even multiple categories
+ * 5a. Ensure that null tag values in the database are actually the empty string to avoid errors in parsing
+ * [X] 6. Determine the nature of the double-click requirement
+ * [X] 7. Allow a category to be selected
  * . . .
  * and so on and so forth
  * . . .
  * n. Allow adding of new tags and categories
  * n+1. Move on to the currentNote panel
  * . . .
+ * m-1. Make the NotePreviews more uniform and visually appealing
  * m. Organize the formatting and sizing of the app to be uniform across and between panels
  * . . .
  * Improve, improve, improve!
@@ -53,11 +56,12 @@ public class BasicNotesApp {
 	JLabel sTag1, sTag2;*/
 	//JPanel sTagsPanel;
 	JLabel oneNote;
-	JPanel selectionPanel;
+	JPanel selectionPanel, sNotesPanel;
+	JScrollPane sScrollPane;
 	
 	//currNotePanel components
 	JLabel cNLabel;
-	JTextField cNTag1, cNTag2;
+	JLabel cNTag1, cNTag2;
 	JPanel cNTagPanel;
 	JTextArea cNTextArea;
 	JPanel currNotePanel;
@@ -67,7 +71,7 @@ public class BasicNotesApp {
 	JFrame frame;
 	
 	//Action listeners and tree listeners
-	treeListener tListener;
+	basicListener bListener;
 	
 	//Final variables
 	
@@ -75,7 +79,7 @@ public class BasicNotesApp {
 	public BasicNotesApp(BasicNotesDB db){
 		dataBase = db;
 		
-		tListener = new treeListener();
+		bListener = new basicListener();
 		//invoke createCategoryPanel() to create the categoryPanel
 		createCategoryPanel();
 		//categoryPanel components (cComponents) are now instantiated
@@ -121,8 +125,8 @@ public class BasicNotesApp {
 		DefaultMutableTreeNode top = new DefaultMutableTreeNode("delete");
 		createCTreeNodes(top);
 		cTree = new JTree(top);
-		cTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-		cTree.addTreeSelectionListener(tListener);
+		cTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+		cTree.addTreeSelectionListener(bListener);
 		cTree.setRootVisible(false);
 		GridBagConstraints cTConstraints = new GridBagConstraints();
 		cTConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
@@ -140,9 +144,12 @@ public class BasicNotesApp {
 	 * creates JPanel selectionPanel and related components
 	 */
 	private void createSelectionPanel() {
-		selectionPanel = new JPanel(new GridBagLayout());
+		selectionPanel = new JPanel(new BorderLayout());
+		sNotesPanel = new JPanel(new GridBagLayout());
+		sScrollPane = new JScrollPane(sNotesPanel);
+		sScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		selectionPanel.add(sScrollPane, BorderLayout.CENTER);
 		selectionPanel.setPreferredSize(new Dimension(300,400));
-		selectionPanel.setBackground(Color.lightGray);
 	}
 	
 	/**
@@ -150,8 +157,8 @@ public class BasicNotesApp {
 	 */
 	private void createCurrentNotePanel() {
 		cNLabel = new JLabel("CurrNote");
-		cNTag1 = new JTextField("Tag1");
-		cNTag2 = new JTextField("Tag2");
+		cNTag1 = new JLabel("Tag1");
+		cNTag2 = new JLabel("Tag2");
 		cNTagPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		cNTagPanel.add(cNLabel);
 		cNTagPanel.add(cNTag1);
@@ -194,75 +201,115 @@ public class BasicNotesApp {
 	    }
 	}
 	
-	private void callDeadCode() {
-		/* dead code
-		sCategory = new JComboBox(categories);
-		sCategory.addActionListener(listener);
-		sTag1 = new JLabel("Tag1");
-		sTag2 = new JLabel("Tag2");
-		sTagsPanel.add(sCategory);
-		sTagsPanel.add(sTag1);
-		sTagsPanel.add(sTag2);
-		listener = new simpleListener();
-		categories = new Vector<String>();
-		categories.add("Category");
-		Vector<String> cats = dataBase.getCategoryNames();
-		for(int i=0; i<cats.size(); i++)
-			categories.add(cats.get(i));
-		
-		sTagsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		selectionPanel.add(sTagsPanel, BorderLayout.NORTH);*/
-	}
-	
 	/**
 	 * Currently examines the node last selected and sets the JLabel oneNote to be the text of the first note
 	 * with the corresponding tag (of the selected node)
 	 */
-	private class treeListener implements TreeSelectionListener{
+	private class basicListener implements TreeSelectionListener, MouseListener{
+		@Override
 		public void valueChanged(TreeSelectionEvent e) {
-	        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
-	                           cTree.getLastSelectedPathComponent();
 
-	        if (node == null) return;
-
-	        Object nodeInfo = node.getUserObject();
-	        if (node.isLeaf()) {
-	            String tag = (String)nodeInfo;
-	            Vector<String> notes = dataBase.getNotesFromTag(tag);
-	            GridBagConstraints c = new GridBagConstraints();
-	            c.weightx=1;
-	            c.weighty= 1.0 / (double)notes.size();
-	            c.gridx=0;
-	            c.gridy=0;
-	            c.insets = new Insets(5,5,5,5);
-	            selectionPanel.removeAll();
+	        TreePath[] sPaths = cTree.getSelectionPaths();;
+	        DefaultMutableTreeNode sNode;
+	        Vector<Note> sNotes = new Vector<Note>();
+	        for(int i=0; i<sPaths.length; i++) {
+	        	sNode = ((DefaultMutableTreeNode)sPaths[i].getLastPathComponent());
+	        	if(sNode.isLeaf()) 
+	        		sNotes.addAll(dataBase.getNotesFromTag(((String)sNode.getUserObject())));
+	        	
+	        	else{
+	        		sNotes.addAll(dataBase.getNotesFromCategory((String)sNode.getUserObject()));
+	        	}
+	        }
+	        sNotesPanel.removeAll();
+	        if(sNotes.size()==0) {
+	            selectionPanel.revalidate();
 	            selectionPanel.repaint();
-	            for(int i = 0; i<notes.size()-1; i++) {
-	            	String note = notes.get(i);
-	            	NotePreview newNote = new NotePreview(note);
-	            	selectionPanel.add(newNote, c);
-	            	c.gridy++;
-	            }
-	        }       
+	        	return;
+	        }
+	        GridBagConstraints c = new GridBagConstraints();
+            c.weightx=1;
+            c.weighty= 1.0 / (double)(sNotes.size());
+            c.gridx=0;
+            c.gridy=0;
+            c.anchor = GridBagConstraints.PAGE_START;
+            c.insets = new Insets(5,5,5,5);
+            for(int i = 0; i<(sNotes.size()); i++) {
+            	NotePreview newNote = new NotePreview(sNotes.get(i));
+               	sNotesPanel.add(newNote, c);
+            	c.gridy++;
+            	//System.out.println(i-1 +" notes added");
+            }
+            selectionPanel.revalidate();
+            selectionPanel.repaint();  
 	    }
+
+		
+		@Override
+		public void mouseClicked(MouseEvent click) {
+			if(click.getComponent().getClass().equals(NotePreview.class)) {
+				Note note = ((NotePreview)click.getSource()).getNote();
+				cNTextArea.setText(note.getContent());
+				cNTag1.setText(note.getTags().get(0));
+				cNTag2.setText(note.getTags().get(1));
+				cNLabel.setText(""+note.getId());
+				currNotePanel.revalidate();
+				currNotePanel.repaint();
+			}
+			
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseExited(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mousePressed(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent arg0) {
+			// TODO Auto-generated method stub
+			
+		}
+	
+		
 	}
 	
 	private class NotePreview extends JPanel{
-		private String noteContent;
+		private Note note;
 		private JLabel noteLabel;
 		
-		public NotePreview(String content) {
-			noteContent = content;
-			noteLabel = new JLabel("<html>"+noteContent+"</html>");
-			noteLabel.setPreferredSize(new Dimension(280,130));
+		public NotePreview(Note n) {
+			note = new Note(n);
+			noteLabel = new JLabel("<html>"+note.getContent()+"</html>");
+			noteLabel.setPreferredSize(new Dimension(255,130));
 			this.setLayout(new GridBagLayout());
-			this.setPreferredSize(new Dimension(290,140));
+			//this.setPreferredSize(new Dimension(265,140));
 			this.setBackground(Color.white);
 			GridBagConstraints nLConstraints  = new GridBagConstraints();
 			nLConstraints.insets = new Insets(5,5,5,5);
 			nLConstraints.anchor = nLConstraints.CENTER;
+			this.addMouseListener(bListener);
 			this.add(noteLabel, nLConstraints);
 		}
+		public Note getNote() {
+			return note;
+		}
+		public String getContent() {
+			return note.getContent();
+		}
 	}
+	
 	
 }
