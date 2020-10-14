@@ -1,6 +1,7 @@
 package basicNotes;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
@@ -12,8 +13,31 @@ import java.awt.event.ItemEvent;
 import java.util.Vector;
 
 import javax.swing.*;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeSelectionModel;
 
+/**
+ * 
+ * The immediate tasks to reconcile are as follows (in order of tackling, I think)
+ * [X] 1. Implement an action listener for the tree so that the selectionPanel displays a note corresponding to the selected tag
+ * [X] 2. Create a formatting system for the displayed note to fit into a horizontal constraint
+ * [X] 3. Allow multiple notes to display when a tag is selected
+ * [X] 4. Allow a category to be selected, displaying all notes from that category
+ * 5. Allow multiple tags to be selected, or even multiple categories
+ * 6. Determine the nature of the double-click requirement
+ * 7. Allow a category to be selected
+ * . . .
+ * and so on and so forth
+ * . . .
+ * n. Allow adding of new tags and categories
+ * n+1. Move on to the currentNote panel
+ * . . .
+ * m. Organize the formatting and sizing of the app to be uniform across and between panels
+ * . . .
+ * Improve, improve, improve!
+ */
 
 
 public class BasicNotesApp {
@@ -38,16 +62,20 @@ public class BasicNotesApp {
 	JTextArea cNTextArea;
 	JPanel currNotePanel;
 	
-	
 	//final components
 	JPanel finalPanel;
 	JFrame frame;
 	
-	simpleListener listener;
+	//Action listeners and tree listeners
+	treeListener tListener;
+	
+	//Final variables
+	
 	
 	public BasicNotesApp(BasicNotesDB db){
 		dataBase = db;
 		
+		tListener = new treeListener();
 		//invoke createCategoryPanel() to create the categoryPanel
 		createCategoryPanel();
 		//categoryPanel components (cComponents) are now instantiated
@@ -79,7 +107,7 @@ public class BasicNotesApp {
 	    frame.setTitle("Basic File Reader");
 	    frame.setLayout(new BorderLayout());
 	    frame.add(finalPanel, BorderLayout.CENTER); 
-	    frame.setSize(new Dimension(800, 650));
+	    frame.setSize(new Dimension(1500, 1000));
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    frame.setLocationRelativeTo(null);
 	    frame.setResizable(false);
@@ -93,21 +121,28 @@ public class BasicNotesApp {
 		DefaultMutableTreeNode top = new DefaultMutableTreeNode("delete");
 		createCTreeNodes(top);
 		cTree = new JTree(top);
+		cTree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
+		cTree.addTreeSelectionListener(tListener);
 		cTree.setRootVisible(false);
-		categoryPanel = new JPanel(new BorderLayout());
-		categoryPanel.add(cTree, BorderLayout.CENTER);
+		GridBagConstraints cTConstraints = new GridBagConstraints();
+		cTConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+		cTConstraints.ipadx=5;
+		cTConstraints.ipady=5;
+		cTConstraints.weightx=1;
+		cTConstraints.weighty=1;
+		categoryPanel = new JPanel(new GridBagLayout());
+		categoryPanel.add(cTree, cTConstraints);
+		categoryPanel.setPreferredSize(new Dimension(150,400));
+		categoryPanel.setBackground(Color.white);
 	}
 	
 	/**
 	 * creates JPanel selectionPanel and related components
 	 */
 	private void createSelectionPanel() {
-	    //callDeadCode()
-		//String note = dataBase.getNotesFromTag("Nietzsche").get(0);
-		//oneNote = new JLabel(note);
-		oneNote = new JLabel("Basic example of a note");
-		selectionPanel = new JPanel(new BorderLayout());
-		selectionPanel.add(oneNote);
+		selectionPanel = new JPanel(new GridBagLayout());
+		selectionPanel.setPreferredSize(new Dimension(300,400));
+		selectionPanel.setBackground(Color.lightGray);
 	}
 	
 	/**
@@ -179,22 +214,55 @@ public class BasicNotesApp {
 		selectionPanel.add(sTagsPanel, BorderLayout.NORTH);*/
 	}
 	
-	private class simpleListener implements ActionListener{
-		public void actionPerformed(ActionEvent e) {
-			/*if(e.getSource() == sCategory) {
-				if((String)sCategory.getSelectedItem() != "Category") {
-					Vector<String> tags = dataBase.getCategoryTags((String)sCategory.getSelectedItem());
-					sTag1.setText(tags.get(0));
-					sTag2.setText(tags.get(1));
-				}
-				else {
-					sTag1.setText("Tag1");
-					sTag2.setText("Tag2");
-				}
-			}*/
-		}
+	/**
+	 * Currently examines the node last selected and sets the JLabel oneNote to be the text of the first note
+	 * with the corresponding tag (of the selected node)
+	 */
+	private class treeListener implements TreeSelectionListener{
+		public void valueChanged(TreeSelectionEvent e) {
+	        DefaultMutableTreeNode node = (DefaultMutableTreeNode)
+	                           cTree.getLastSelectedPathComponent();
+
+	        if (node == null) return;
+
+	        Object nodeInfo = node.getUserObject();
+	        if (node.isLeaf()) {
+	            String tag = (String)nodeInfo;
+	            Vector<String> notes = dataBase.getNotesFromTag(tag);
+	            GridBagConstraints c = new GridBagConstraints();
+	            c.weightx=1;
+	            c.weighty= 1.0 / (double)notes.size();
+	            c.gridx=0;
+	            c.gridy=0;
+	            c.insets = new Insets(5,5,5,5);
+	            selectionPanel.removeAll();
+	            selectionPanel.repaint();
+	            for(int i = 0; i<notes.size()-1; i++) {
+	            	String note = notes.get(i);
+	            	NotePreview newNote = new NotePreview(note);
+	            	selectionPanel.add(newNote, c);
+	            	c.gridy++;
+	            }
+	        }       
+	    }
 	}
 	
-	
+	private class NotePreview extends JPanel{
+		private String noteContent;
+		private JLabel noteLabel;
+		
+		public NotePreview(String content) {
+			noteContent = content;
+			noteLabel = new JLabel("<html>"+noteContent+"</html>");
+			noteLabel.setPreferredSize(new Dimension(280,130));
+			this.setLayout(new GridBagLayout());
+			this.setPreferredSize(new Dimension(290,140));
+			this.setBackground(Color.white);
+			GridBagConstraints nLConstraints  = new GridBagConstraints();
+			nLConstraints.insets = new Insets(5,5,5,5);
+			nLConstraints.anchor = nLConstraints.CENTER;
+			this.add(noteLabel, nLConstraints);
+		}
+	}
 	
 }

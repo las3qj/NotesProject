@@ -365,6 +365,7 @@ public class BasicNotesDB {
      * Returns all notes corresponding to the requested tag
      * @param tag String representing a tag in the dataBase
      * @return a vector of the 'note' contents of every note with tag1 or tag2 'tag'
+     * returns the empty string if no notes correspond to this tag
      */
     public Vector<String> getNotesFromTag(String tag){
     	String sql = "select note from notes where tag1 = ? or tag2 = ?";
@@ -377,7 +378,8 @@ public class BasicNotesDB {
                 // loop through the result set
                 while (rs.next()) {
                     results.add(rs.getString("note"));
-                }                
+                }
+                results.add("");
                
            } catch (SQLException e) {
                System.out.println(e.getMessage());
