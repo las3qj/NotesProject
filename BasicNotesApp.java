@@ -33,8 +33,11 @@ import javax.swing.tree.TreeSelectionModel;
  * . . .
  * and so on and so forth
  * . . .
- * n. Allow adding of new tags and categories
- * n+1. Move on to the currentNote panel
+ * 8. Allow categories in dataBase to have a greater number of tags
+ * 9. Allow adding of categories
+ * 10. Allow adding of tags
+ * . . .
+ * 9. Move on to the currentNote panel
  * . . .
  * m-1. Make the NotePreviews more uniform and visually appealing
  * m. Organize the formatting and sizing of the app to be uniform across and between panels
@@ -195,10 +198,16 @@ public class BasicNotesApp {
 	    	
 	    	//pull tags for each category in dataBase
 	    	for(int j = 0; j<tags.size(); j++) {
+	    		if(tags.get(j)==null)
+	    			break;
 	    		tag = new DefaultMutableTreeNode(tags.get(j));
 	    		category.add(tag);
 	    	}
+	    	tag = new DefaultMutableTreeNode("Add tag");
+	    	category.add(tag);
 	    }
+	    category = new DefaultMutableTreeNode("Add category");
+	    top.add(category);
 	}
 	
 	/**
@@ -214,8 +223,18 @@ public class BasicNotesApp {
 	        Vector<Note> sNotes = new Vector<Note>();
 	        for(int i=0; i<sPaths.length; i++) {
 	        	sNode = ((DefaultMutableTreeNode)sPaths[i].getLastPathComponent());
-	        	if(sNode.isLeaf()) 
-	        		sNotes.addAll(dataBase.getNotesFromTag(((String)sNode.getUserObject())));
+	        	if(sNode.isLeaf()) {
+	        		if(((String)sNode.getUserObject()).equals("Add tag")) {
+	        			JFrame f = new JFrame();
+	        			String tag = JOptionPane.showInputDialog(f, "Enter tag name");
+	        		}
+	        		else if(((String)sNode.getUserObject()).equals("Add category")) {
+	        			JFrame f = new JFrame();
+	        			String category = JOptionPane.showInputDialog(f, "Enter category name");
+	        		}
+	        		else
+	        			sNotes.addAll(dataBase.getNotesFromTag(((String)sNode.getUserObject())));
+	        	}
 	        	
 	        	else{
 	        		sNotes.addAll(dataBase.getNotesFromCategory((String)sNode.getUserObject()));
