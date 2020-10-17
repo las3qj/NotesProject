@@ -10,13 +10,23 @@ public class Note {
 	public Note(String c, int i, Vector<String> ts) {
 		content=c;
 		id=i;
-		tags=ts;
+		tags=new Vector<String>();
+		for(int j=0; j<ts.size(); j++) {
+			if(ts.get(j)!=null)
+				tags.add(ts.get(j));
+		}
 	}
 	
 	public Note(Note n) {
 		this.content=n.getContent();
 		this.id=n.getId();
 		this.tags = n.getTags();
+	}
+	
+	public Note() {
+		id=-1;
+		content = "";
+		tags = new Vector<String>();
 	}
 	
 	public String getContent() {
@@ -28,4 +38,13 @@ public class Note {
 	public Vector<String> getTags(){
 		return tags;
 	}
-}
+	public void setTags(Vector<String> ts) {
+		tags = ts;
+	}
+	public void setId(int i) {
+		id=i;
+	}
+	public void setContent(String con) {
+		content = con;
+	}
+	}
