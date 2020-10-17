@@ -184,23 +184,8 @@ public class BasicNotesApp {
 	 * creates JPanel categoryPanel and related components
 	 */
 	private void createCategoryPanel() {
-		top = new DefaultMutableTreeNode("delete");
-		cTModel = new DefaultTreeModel(top);
-		createCTreeNodes(top);
-		cTree = new JTree(cTModel);
-		cTree.addMouseListener(bListener);
-		Font f = cTree.getFont();
-		cTree.setFont(new Font(f.getName(), f.getStyle(), f.getSize()+5));
-		cTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-		cTree.addTreeSelectionListener(bListener);
-		cTree.setRootVisible(false);
-		GridBagConstraints cTConstraints = new GridBagConstraints();
-		cTConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
-		cTConstraints.insets=new Insets(10,10,0,0);
-		cTConstraints.weightx=1;
-		cTConstraints.weighty=1;
 		intCatPanel = new JPanel(new GridBagLayout());
-		intCatPanel.add(cTree, cTConstraints);
+		createCTreeNodes();
 		intCatPanel.setBackground(Color.white);
 		catScrollPane = new JScrollPane(intCatPanel);
 		catScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
@@ -351,7 +336,8 @@ public class BasicNotesApp {
 	 * 
 	 * @param top is the top node for JTree cTree
 	 */
-	private void createCTreeNodes(DefaultMutableTreeNode top) {
+	private void createCTreeNodes() {
+		top = new DefaultMutableTreeNode("delete");
 		DefaultMutableTreeNode category = null;
 	    DefaultMutableTreeNode tag = null;
 	    
@@ -376,6 +362,22 @@ public class BasicNotesApp {
 	    }
 	    category = new DefaultMutableTreeNode("Add category");
 	    top.add(category);
+	    
+		cTModel = new DefaultTreeModel(top);
+		cTree = new JTree(cTModel);
+		cTree.addMouseListener(bListener);
+		Font f = cTree.getFont();
+		cTree.setFont(new Font(f.getName(), f.getStyle(), f.getSize()+5));
+		cTree.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
+		cTree.addTreeSelectionListener(bListener);
+		cTree.setRootVisible(false);
+		GridBagConstraints cTConstraints = new GridBagConstraints();
+		cTConstraints.anchor = GridBagConstraints.FIRST_LINE_START;
+		cTConstraints.insets=new Insets(10,10,0,0);
+		cTConstraints.weightx=1;
+		cTConstraints.weighty=1;
+		intCatPanel.removeAll();
+		intCatPanel.add(cTree, cTConstraints);
 	}
 	
 	/**
@@ -687,7 +689,6 @@ public class BasicNotesApp {
 				for(int i=node.getChildCount()-1; i>=0; i--) {
 					cTModel.removeNodeFromParent((MutableTreeNode)node.getChildAt(i));
 				}
-				cTModel.removeNodeFromParent(node);
 			}
 			//for every note with this any of these tags, remove these tags and update the note
 			for(int i=0; i<notes.size(); i++) {
@@ -696,17 +697,20 @@ public class BasicNotesApp {
 				ts.removeAll(tags);
 				n.setTags(ts);
 				dataBase.updateNote(n);
-				//update the node
-				top.removeAllChildren();
 			}
+			//update the node
+			top.removeAllChildren();
 			
 			//update curTags
-			createCTreeNodes(top);
+			createCTreeNodes();
+			extCatPanel.revalidate();
+			extCatPanel.repaint();
 			curTags.removeAll(tags);
 			populateSNotes(curTags);
 			if(currNote!=null)
 				currNote=dataBase.getNoteFromId(currNote.getId());
 			populateCNPanel(currNote);
+			
 			
 			
 		}

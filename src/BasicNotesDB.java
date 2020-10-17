@@ -425,29 +425,6 @@ public class BasicNotesDB {
     }
 
     /**
-     * Delete a category specified by the name
-     *
-     * @param name
-     */
-    public void deleteCategory(String name) {
-        String sql = "DELETE FROM categories WHERE name = ?";
-
-        try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            // set the corresponding param
-            pstmt.setString(1, name);
-            // execute the delete statement
-            pstmt.executeUpdate();
-            conn.commit();
-            conn.close();
-
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
-    }
-
-    /**
      * Delete the category table
      **/
     private void deleteCategories() {
@@ -517,6 +494,24 @@ public class BasicNotesDB {
             System.out.println(e.getMessage());
         }
     }
+    
+    /**
+     * Helper function for testNotes(), inserts a new Note according to its given parameters
+     * @param content - content for the note
+     * @param id - known id of the note
+     * @param ts - Vector of tags for the note
+     */
+    private void addTestNote(String content, int id, Vector<String> ts) {
+    	Vector<String> tags = new Vector<String>();
+    	tags.add(ts.get(0));
+    	Note n = new Note(content, id, new Vector<String>(tags));
+    	this.publishNote(n);
+    	for(int i=1; i<ts.size(); i++) {
+    		tags.add(ts.get(i));
+    		n = new Note(content, id, new Vector<String>(tags));
+    		this.updateNote(n);
+    	}
+    }
 
 	/**
      * Update tags of a note specified by the name
@@ -568,35 +563,6 @@ public class BasicNotesDB {
             }
     }
     
-    /**
-     * Return the Note identified by the id
-     * @param id- identification of the note
-     * @return Note object for the note
-     */
-    public Note getNoteFromId(int idi) {
-    	String sql = selectNoteSQL;
-    	Note newN= new Note();
-    	try (Connection conn = this.connect();
-        		PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            	pstmt.setInt(1, idi);
-            	ResultSet rs    = pstmt.executeQuery();
-                // loop through the result set
-                while (rs.next()) {
-                	Vector<String> tags = new Vector<String>();
-                	String content = rs.getString("content");
-                	int id = rs.getInt("id");
-                	for(int i=0; i<noteTags; i++) {
-                		tags.add(rs.getString("tag"+(i+1)));
-                	}
-                	newN = new Note(content, id, tags);
-                }                
-               conn.commit();
-               conn.close();
-           } catch (SQLException e) {
-               System.out.println(e.getMessage());
-           }
-    	return newN;
-    }
     /**
      * Return the number of tags in each note
      * @param id of the note being querried
@@ -652,28 +618,6 @@ public class BasicNotesDB {
                System.out.println(e.getMessage());
            }
     	return results;
-    }
-
-    /**
-     * Delete a note specified by the id
-     *
-     * @param id
-     */
-    public void deleteNote(int id) {
-        String sql = "DELETE FROM notes WHERE id = ?";
-
-        try (Connection conn = this.connect();
-                PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            // set the corresponding param
-            pstmt.setInt(1, id);
-            // execute the delete statement
-            pstmt.executeUpdate();
-            conn.commit();
-            conn.close();
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-        }
     }
 
     /**
@@ -805,7 +749,7 @@ public class BasicNotesDB {
 		setSelectNoteSQL();
 		if(tests) {
 			this.testCategories();
-			//this.testNotes();
+			this.testNotes();
 		}
 	}
     
@@ -930,13 +874,35 @@ public class BasicNotesDB {
     }
     
     /**
+     * Delete a category specified by the name
+     *
+     * @param name
+     */
+    public void deleteCategory(String name) {
+        String sql = "DELETE FROM categories WHERE name = ?";
+
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            pstmt.setString(1, name);
+            // execute the delete statement
+            pstmt.executeUpdate();
+            conn.commit();
+            conn.close();
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    /**
      * Update tags of a category specified by the name
      *
      * @param name name of the category to update
      * @param tags is a Vector<String> of the tags to add
      */
     public void updateCategoryTags(String name, Vector<String> tags) {
-    	System.out.println(tags.size());
     	//if there are more tags in the vector than in the categories table
         if(tags.size()>this.catTags) {
         	incCategoryTags(tags.size());
@@ -1052,6 +1018,36 @@ public class BasicNotesDB {
     }
     
     /**
+     * Return the Note identified by the id
+     * @param id- identification of the note
+     * @return Note object for the note
+     */
+    public Note getNoteFromId(int idi) {
+    	String sql = selectNoteSQL;
+    	Note newN= new Note();
+    	try (Connection conn = this.connect();
+        		PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            	pstmt.setInt(1, idi);
+            	ResultSet rs    = pstmt.executeQuery();
+                // loop through the result set
+                while (rs.next()) {
+                	Vector<String> tags = new Vector<String>();
+                	String content = rs.getString("content");
+                	int id = rs.getInt("id");
+                	for(int i=0; i<noteTags; i++) {
+                		tags.add(rs.getString("tag"+(i+1)));
+                	}
+                	newN = new Note(content, id, tags);
+                }                
+               conn.commit();
+               conn.close();
+           } catch (SQLException e) {
+               System.out.println(e.getMessage());
+           }
+    	return newN;
+    }
+    
+    /**
      * Update the selected note with the content and tags
      * @param id - the id of the note to be updated
      * @param newContent - the new content to update
@@ -1101,7 +1097,6 @@ public class BasicNotesDB {
     	return results;
     }
     
-    //HYPER-INEFFICIENT METHOD
     /**
      * Find all notes of all tags within a given category - calls getCategoryTags(cat) and getNotesFromTag() for all tags
      * 
@@ -1144,10 +1139,50 @@ public class BasicNotesDB {
         }
     }
     
+    /**
+     * Delete a note specified by the id
+     *
+     * @param id
+     */
+    public void deleteNote(int id) {
+        String sql = "DELETE FROM notes WHERE id = ?";
+
+        try (Connection conn = this.connect();
+                PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            // set the corresponding param
+            pstmt.setInt(1, id);
+            // execute the delete statement
+            pstmt.executeUpdate();
+            conn.commit();
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
     public void testNotes() {
     	Vector<String> tags = new Vector<String>();
     	tags.add("Nietzsche");
+    	tags.add("Origin C. Thought");
+     	tags.add("Philosophy");
     	tags.add("Quote");
+    	this.addTestNote("all concepts in which an entire process is semiotically summarized elude definition;"
+    			+ " only that which has no history is definable", 1, tags);
+    	tags = new Vector<String>();
+    	tags.add("Camus");
+    	tags.add("Philosophy");
+    	tags.add("Quote");
+    	this.addTestNote("Although 'The Myth of Sisyphus' poses mortal problems, it sums itself up for me as a lucid"
+    			+ "invitation to live and to create, in the very midst of the desert.", 2, tags);
+    	tags = new Vector<String>();
+    	tags.add("Steinbeck");
+    	tags.add("Quote");
+    	tags.add("Literature");
+    	this.addTestNote("The writers of today, even I, have a tendency to celebrate the destruction of the spirit"
+    			+ " and god knows it is destroyed often enough. But the beacon thing is that sometimes it is not.", 3, tags);
+    	
+    	/*
     	insertNote(1, "all concepts in which an entire process is semiotically summarized elude definition;"
     			+ " only that which has no history is definable", tags);
     	tags = new Vector<String>();
@@ -1181,8 +1216,8 @@ public class BasicNotesDB {
     	this.updateNoteContent(5, "Every great human being has a retroactive force: all history is again placed "
     			+ "in the scales for his sake, and a thousand secrets of the past crawl out of their hideouts"
     			+ "--into his sun.");
+    			*/
     	getCurrTags();
     }
-    //From here we need to determine how exactly the app will interact with this database interface
-    //i.e. we really need to spend some time working on creating the design of the app
+
 }
