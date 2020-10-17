@@ -11,7 +11,7 @@ public class BasicNotes {
 
 	public static void main(String[] args) {
 		JFrame f = new JFrame();
-		String path = JOptionPane.showInputDialog(f, "Database pathName", "jdbc:sqlite:C://sqlite/db/basicnotes.db");
+		String path = "jdbc:sqlite:"+ JOptionPane.showInputDialog(f, "Database pathName", "C://sqlite/db/basicnotes.db");
 		int test = (JOptionPane.showConfirmDialog(f, "Populate with test data?"));
 		if(path==null||test==3)
 			return;
