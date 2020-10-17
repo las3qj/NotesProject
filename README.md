@@ -1,6 +1,9 @@
 # NotesProject
 Project to develop an application to organize note snippets according to customizable categories and tags.
 
+For basic information on how to use this application, see section "Usage". 
+For a detailed (yet still abridged) rundown on the project's internal organization, see section "Files - Basic Information".
+
 ## Files - Basic Information
 NotesProject is divided into four main class files, some of which contain private classes for simplification and organization. 
 
@@ -71,4 +74,35 @@ The bottom panel always contains two buttons: one which allows the user to creat
 The middle panel always contains a JTextArea object which represents the editable content of the note selected or being created. The content, along with the tags, is only saved to a note once the "save" button has been activated.
 
 ## Usage
+Usage will focus on how to best interact with the user interface, and what tools within the application the user can utilize to begin organizing their notes!
 
+### Startup
+The application will prompt for a proper location to create a database. To get a set of testing notes to allow quick familiarization with the environment, respond "yes" to the prompt concerning test data. Lastly, two prompts will request app dimensions, for which the application is scalable.
+Note: the default dimensions are those for which it is optimized. It will scale for other dimensions, and may work quite well for many, but the default is the current recommendation.
+
+### Categories
+What can you do with the categories panel (the leftmost panel containing the tree)? Selecting a category or tag will populate the middle panel (the selection panel) with notes associated with that tag or with all tags beneath that category.
+Note: control-click and shift-click is supported for tag selections! Selection multiple tags currently displays the Union of their corresponding notes.
+
+To add a new tag, simply navigate to the corresponding category and select the "add tag" option. The same is true for adding a new category.
+
+To delete a tag, right click a tag and select "delete". Notice that in the corresponding selection panel and current note panel the deleted tag is removed. The same is true of categories.
+
+### Selecting Notes
+Once a category or tag has been selected, the middle panel will become populated with notes corresponding to that tag, category, or multiple selection. Selecting one of those notes will populate the rightmost panel (the current note panel) with the content of the note you selected.
+
+To delete a note, right click its preview in the selection panel and click "delete". The note will be removed from the selection panel, the current note panel (if applicable) and the database.
+
+### Current Note
+Once a note has been selected, its content can be changed and its tags can be edited. The top panel displays all current tags of the currently displayed note. To add a tag, simply click the "Add tag" button. To delete a tag, right click a tag and select "delete". 
+
+To edit the content of the note, simply type away in the middle text area!
+
+To save the changes made to the note, click the save button in the bottom panel. Note the reflected changes in the selection panel!
+Note: changes to the note content or tags are not saved automatically, and must be manually saved from this button.
+
+To create a new note, select the "Create" button on the bottom panel. The panel will populate with an empty text area and an empty list of tags. Save the note to publish it and see reflected changes (if applicable) in the selection panel!
+Note: a note cannot be saved without any tags.
+
+### Close 
+Simply click the x in the top right to close the application. All changes commited will be saved to the database and ready to resume upon next usage!
