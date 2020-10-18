@@ -11,11 +11,15 @@ public class BasicNotes {
 
 	public static void main(String[] args) {
 		JFrame f = new JFrame();
-		String path = "jdbc:sqlite:"+ JOptionPane.showInputDialog(f, "Database pathName", "C://sqlite/db/basicnotes.db");
-		int test = (JOptionPane.showConfirmDialog(f, "Populate with test data?"));
-		if(path==null||test==3)
+		String path = "jdbc:sqlite:"+ JOptionPane.showInputDialog(f, "Database pathName", "C://sqlite/db");
+		int test = (JOptionPane.showConfirmDialog(f, "Load testing table?"));
+		String mes="Reset/clear data?";
+		if(test==0)
+			mes = "Reset default test values?";
+		int reset = (JOptionPane.showConfirmDialog(f, mes));
+		if(path==null||test==3||reset==3)
 			return;
-		BasicNotesDB dataBase = new BasicNotesDB(path,test==0);
+		BasicNotesDB dataBase = new BasicNotesDB(path,test==0,reset==0);
 		
 			
 		//hard reset the tables

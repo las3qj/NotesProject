@@ -695,8 +695,12 @@ public class BasicNotesApp {
 				Note n = notes.get(i);
 				Vector<String> ts = n.getTags();
 				ts.removeAll(tags);
-				n.setTags(ts);
-				dataBase.updateNote(n);
+				if(ts.size()==0)
+					dataBase.deleteNote(n.getId());
+				else {
+					n.setTags(ts);
+					dataBase.updateNote(n);
+				}
 			}
 			//update the node
 			top.removeAllChildren();

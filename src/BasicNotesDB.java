@@ -258,8 +258,6 @@ public class BasicNotesDB {
      * @param fileName the database file name
      */
 	private void createNewTables() {
-        // SQLite connection string
-        //String url = "jdbc:sqlite:C://sqlite/db/basicnotes.db";
         
         // SQL statement for creating a new table -- categories
         String sql1 = "CREATE TABLE IF NOT EXISTS categories (\n"
@@ -667,7 +665,6 @@ public class BasicNotesDB {
      */
 	private void populateTagTable() {
 		String sql = "INSERT INTO taginfo(name,tags) VALUES(?,?)";
-
         try (Connection conn = this.connect();
             PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, "categories");
@@ -681,6 +678,7 @@ public class BasicNotesDB {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+        
 	}
 	
 	/**
@@ -723,21 +721,28 @@ public class BasicNotesDB {
 	/**
 	 * Constructor
 	 */
-	public BasicNotesDB(String url, boolean tests){
-		conn = url;
+	public BasicNotesDB(String url, boolean tests, boolean reset){
 		//delete tables, create new tables, and populate tagtable
-		if(tests) {
+		boolean firstRun=false;
+		
+		if(tests) 
+			conn = url+"/testnotes.db";
+		
+		else 
+			conn = url+"/mynotes.db";
+		
+		if(reset) 
 			reset();
-			createNewTables();
+		
+		createNewTables();	
+		if(getCategoryNames().size()==0||reset)
+			firstRun=true;
+		
+		if(firstRun) {
 			populateTagTable();
-			catTags = 2;
-			noteTags = 2;
 		}
-		else {
-			createNewTables();
-			//set catTags and noteTags to the current tags from the table
-			getCurrTags();
-		}
+		
+		getCurrTags();
 		setCatInsertSQL();
 		setNoteInsertSQL();
 		setSelectAllTagsSQL();
@@ -747,9 +752,10 @@ public class BasicNotesDB {
 		setUpdateCatTagsSQL();
 		setSelectNoteFromTagSQL();
 		setSelectNoteSQL();
-		if(tests) {
+		
+		if(tests&&firstRun) {
 			this.testCategories();
-			this.testNotes();
+			this.testNotes();		
 		}
 	}
     
@@ -945,9 +951,11 @@ public class BasicNotesDB {
     	this.updateCategoryTags("Tips for Using", new Vector<String>(tips));
     	Vector<String> authors = new Vector<String>();
     	this.addCategory("Authors");
-    	authors.add("Arendt");
+    	authors.add("Beauvoir");
     	updateCategoryTags("Authors", new Vector<String>(authors));
     	authors.add("Camus");
+    	updateCategoryTags("Authors", new Vector<String>(authors));
+    	authors.add("Emerson");
     	updateCategoryTags("Authors", new Vector<String>(authors));
     	authors.add("Freud");
     	updateCategoryTags("Authors", new Vector<String>(authors));
@@ -1176,47 +1184,166 @@ public class BasicNotesDB {
     	this.addTestNote("Although 'The Myth of Sisyphus' poses mortal problems, it sums itself up for me as a lucid"
     			+ "invitation to live and to create, in the very midst of the desert.", 2, tags);
     	tags = new Vector<String>();
+    	tags.add("Camus");
+    	tags.add("Philosophy");
+    	tags.add("Quote");
+    	this.addTestNote("Each atom of that stone, each mineral flake of that night-filled mountain, in itself forms"
+    			+ " a world. The struggle itself toward the heights is enough to fill a man's heart. One must imagine"
+    			+ "Sisyphus happy.", 3, tags);
+    	tags = new Vector<String>();
+    	tags.add("Literature");
     	tags.add("Steinbeck");
     	tags.add("Quote");
-    	tags.add("Literature");
     	this.addTestNote("The writers of today, even I, have a tendency to celebrate the destruction of the spirit"
-    			+ " and god knows it is destroyed often enough. But the beacon thing is that sometimes it is not.", 3, tags);
-    	
-    	/*
-    	insertNote(1, "all concepts in which an entire process is semiotically summarized elude definition;"
-    			+ " only that which has no history is definable", tags);
+    			+ " and god knows it is destroyed often enough. But the beacon thing is that sometimes it is not.", 4, tags);
     	tags = new Vector<String>();
+    	tags.add("Literature");
+    	tags.add("Steinbeck");
+    	tags.add("Quote");
+    	this.addTestNote("But it becomes important out of all proportion to its importance. And I suppose that is essential."
+    			+ "The dunghill beetle must be convinced of the essential quality in rolling his ball of dung. . .",5,tags);
+    	tags = new Vector<String>();
+    	tags.add("Literature");
+    	tags.add("Steinbeck");
+    	tags.add("Quote");
+    	this.addTestNote("Now this I must say and say right here and so sharply and so memorably that it will not be "
+    			+ "forgotten in the rather terrible and disheartening things which are to come in this book; so that "
+    			+ "although East of Eden is not Eden, it is not insuperably far away.",6,tags);
+    	tags = new Vector<String>();
+    	tags.add("Literature");
+    	tags.add("Melville");
+    	tags.add("Quote");
+    	this.addTestNote("Now small fowls flew screaming over the yet yawning gulf; a sullen white surf beat against its"
+    			+ " steep sides; then all collapsed, and the great shroud of the sea rolled on as it rolled five"
+    			+ " thousand years ago.", 7, tags);
+    	tags = new Vector<String>();
+    	tags.add("Literature");
+    	tags.add("Melville");
+    	tags.add("Quote");
+    	this.addTestNote(". . .all this to explain, would be to dive deeper than Ishmael can go. . .", 8, tags);
+    	tags = new Vector<String>();
+    	tags.add("Freud");
+    	tags.add("Master Thinkers");
+    	tags.add("Quote");
+    	this.addTestNote("In writing this work I have discovered afresh the most banal truths", 9, tags);
+    	tags = new Vector<String>();
+    	tags.add("Freud");
+    	tags.add("Master Thinkers");
+    	tags.add("Quote");
+    	this.addTestNote("One can hardly be wrong in concluding that the idea of life having a purpose stands"
+    			+ " and falls with the religious system.", 10, tags);
+    	tags = new Vector<String>();
+    	tags.add("Freud");
+    	tags.add("Master Thinkers");
+    	tags.add("Quote");
+    	this.addTestNote("And we may well heave a sigh of relief at the thought that it is nevertheless"
+    			+ " vouchsafed to a few to salvage without effort from the whirlpool of their own feelings"
+    			+ "the deepest truths, towards which the rest of us have to find our way through tormenting"
+    			+ "uncertainty and with restless groping.", 11, tags);
+    	tags = new Vector<String>();
+    	tags.add("Master Thinkers");
+    	tags.add("Nietzsche");
+    	tags.add("Origin C. Thought");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+    	this.addTestNote("The same impulse that calls art into existence, the complement and apotheoisis of existence"
+    			+ ", also created the Olympian world with which the Hellenic 'will' held up a transfiguring mirror"
+    			+ "to itself. Thus the gods provide a justification for the life of man by living it themselves", 12, tags);
+    	tags = new Vector<String>();
+    	tags.add("Nietzsche");
+    	tags.add("Origin C. Thought");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+    	this.addTestNote("Every great human being has a retroactive force: all history is again placed in the scales for his"
+    			+ "sake, and a thousand secrets of the past crawl out of their hideouts--into his sun.", 13, tags);
+    	tags = new Vector<String>();
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
     	tags.add("Quote");
     	tags.add("Rorty");
-    	insertNote(2, "Rather, he saw self-knowledge as self-creation. The process of coming to know oneself,"
-    			+ " confronting one's contingency, tracking one's causes home, is identical with the process"
-    			+ "of inventing a new language -- that is, of thinking up some new metaphors.", tags);
+    	this.addTestNote("But if we could ever become reconciled to the idea that most of reality is indifferent"
+    			+ " to our descriptions of it, and that the human self is created by the use of a vocabulary"
+    			+ " rather than being adequately or inadequately expressed in a vocabulary, then we should at least"
+    			+ " have assimilated what was true in the Romantic idea that truth is made rather than found.", 14, tags);
     	tags = new Vector<String>();
-    	tags.add("Philosophy");
-    	tags.add("Nietzsche");
-    	insertNote(3, "Nietzsche does not argue that truth does not exist, but merely that truth is not *out there*"
-    			+ " -- that is, there is no truth beyond our interpretations. Truth is multiple, perspectival", 
-    			tags);
-    	tags = new Vector<String>();
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
     	tags.add("Quote");
-    	tags.add("Nietzsche");
-    	insertNote(4, "What, then, is truth? A mobile army of metaphors, metonyms, and anthropomorphisms--in short,"
-    			+ "a sum of human relations, which have been enhanced, transposed, and embellished poetically and "
-    			+ "rhetoircally, and which after long use seem firm, canonical, and obligatory to a people: truths"
-    			+ " are illusions about which one has forgotten that this is what they are; metaphors which are"
-    			+ " worn out and without sensuous power; coins which have lost their pictures and now matter only as"
-    			+ "metal, no longer as coins", tags);
-    	tags.add("Philosophy");
-    	updateNoteTags(4,tags);
+    	tags.add("Rorty");
+    	this.addTestNote("Rather, he saw self-knowledge as self-creation. The process of coming to know onself, "
+    			+ "confronting one's contingency, tracking one's causes home, is identical with the process of "
+    			+ "inventing a new language--that is, thinking up some new metaphors", 15, tags);
     	tags = new Vector<String>();
-    	tags.add("Nietzsche");
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
     	tags.add("Quote");
-    	insertNote(5, "Every great pig has a retroactive force: all history is again placed in the scales for"
-    			+ " his sake, and a thousand secrets of the past crawl out of their hideouts--into his sun.", tags);
-    	this.updateNoteContent(5, "Every great human being has a retroactive force: all history is again placed "
-    			+ "in the scales for his sake, and a thousand secrets of the past crawl out of their hideouts"
-    			+ "--into his sun.");
-    			*/
+    	tags.add("Rorty");
+    	this.addTestNote("What ties Nietzsche and Freud together is this attempt -- the attempt to see a blind impress "
+    			+ "as not unworthy of programming our lives or our poems.", 16, tags);
+    	tags = new Vector<String>();
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+    	tags.add("Rorty");
+    	this.addTestNote("liberal societies of our century have produced more and more people who are able to recognize"
+    			+ " the contingency of the vocabulary in which they state their highest hopes -- the contingency of"
+    			+ " their own consciences -- and yet have remained faithful to those consciences", 17, tags);
+    	tags = new Vector<String>();
+    	tags.add("Emerson");
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+    	this.addTestNote("The secret of the illusoriness is in the necessity of a succession of moods or objects. "
+    			+ "Gladly we would anchor, but the anchorage is quicksand", 18, tags);
+    	tags = new Vector<String>();
+    	tags.add("Emerson");
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+      	this.addTestNote("I have learned that I cannot dispose of other people’s facts; but I possess such a key to "
+      			+ "my own as persuades me, against all their denials, that they also have a key to theirs.", 19, tags);
+    	tags = new Vector<String>();
+    	tags.add("Emerson");
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+      	this.addTestNote("Thus inevitably does the universe wear our color, and every object fall successively into the "
+      			+ "subject itself.", 20, tags);
+    	tags = new Vector<String>();
+    	tags.add("Emerson");
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+      	this.addTestNote("These roses under my window make no reference to former roses or to better ones; "
+      			+ "they are for what they are", 21, tags);
+    	tags = new Vector<String>();
+    	tags.add("Beauvoir");
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+    	this.addTestNote("Man's gods are in such a faraway heaven that in truth, for him, there are no gods: "
+    			+ "the little girl lives among gods with a human face.", 22, tags);
+    	tags = new Vector<String>();
+    	tags.add("Beauvoir");
+    	tags.add("Master Thinkers");
+     	tags.add("Philosophy");
+    	tags.add("Quote");
+    	this.addTestNote("It is a terrible frustration not to be able to imprint the movements of one's heart on"
+    			+ " the face of the earth.", 23, tags);
+    	tags = new Vector<String>();
+    	tags.add("Literature");
+    	tags.add("Quote");
+     	tags.add("Sartre");
+    	this.addTestNote("Through layers and layers of existence, it veils itself, thin and firm, and when you"
+    			+ " want to seize it, you find only existants, you butt against existants devoid of sense.", 24, tags);
+    	tags = new Vector<String>();
+    	tags.add("Literature");
+    	tags.add("Quote");
+     	tags.add("Sartre");
+    	this.addTestNote("And I, too, wanted to be. That is all I wanted; this is the last word. . . And at that very"
+    			+ "moment, on the other side of existence, in this other world which you can see in the distance, but"
+    			+ " without ever approaching it, a little melody began to sing and dance", 25, tags);
+    	
     	getCurrTags();
     }
 
