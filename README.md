@@ -85,8 +85,13 @@ Note: the default dimensions are those for which it is optimized. It will scale 
 (App on startup)
 
 ### Categories
-What can you do with the categories panel (the leftmost panel containing the tree)? Selecting a category or tag will populate the middle panel (the selection panel) with notes associated with that tag or with all tags beneath that category.
-Note: control-click and shift-click is supported for tag selections! Selection multiple tags currently displays the Union of their corresponding notes.
+What can you do with the categories panel (the leftmost panel containing the tree)? Selecting a category or tag will populate the middle panel (the selection panel) with notes associated with that tag or with all tags beneath that category. 
+
+Note: control-click and shift-click is supported for tag selections! Selecting multiple tags currently displays the Union of their corresponding notes.
+
+![image](https://user-images.githubusercontent.com/72612647/96357331-70fc0400-10c8-11eb-9ba4-6cd4b40c0567.png)
+
+(Tag "Camus" selected)
 
 To add a new tag, simply navigate to the corresponding category and select the "add tag" option. The same is true for adding a new category.
 
@@ -95,10 +100,16 @@ To delete a tag, right click a tag and select "delete". Notice that in the corre
 ### Selecting Notes
 Once a category or tag has been selected, the middle panel will become populated with notes corresponding to that tag, category, or multiple selection. Selecting one of those notes will populate the rightmost panel (the current note panel) with the content of the note you selected.
 
+![image](https://user-images.githubusercontent.com/72612647/96357342-a6a0ed00-10c8-11eb-9294-7339fbc3e79d.png)
+
+(Note selected)
+
 To delete a note, right click its preview in the selection panel and click "delete". The note will be removed from the selection panel, the current note panel (if applicable) and the database.
 
 ### Current Note
-Once a note has been selected, its content can be changed and its tags can be edited. The top panel displays all current tags of the currently displayed note. To add a tag, simply click the "Add tag" button. To delete a tag, right click a tag and select "delete". 
+Once a note has been selected, its content can be changed and its tags can be edited. The top panel displays all current tags of the currently displayed note. To add a tag, simply click the "Add tag" button. 
+
+To delete a tag, right click a tag and select "delete". 
 
 To edit the content of the note, simply type away in the middle text area!
 
