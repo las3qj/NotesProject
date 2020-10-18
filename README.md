@@ -117,6 +117,24 @@ To save the changes made to the note, click the save button in the bottom panel.
 Note: changes to the note content or tags are not saved automatically, and must be manually saved from this button.
 
 To create a new note, select the "Create" button on the bottom panel. The panel will populate with an empty text area and an empty list of tags. Save the note to publish it and see reflected changes (if applicable) in the selection panel!
+
+![image](https://user-images.githubusercontent.com/72612647/96357384-2e86f700-10c9-11eb-80bb-12c75ce110cc.png)
+
+(New note created)
+
+![image](https://user-images.githubusercontent.com/72612647/96357397-465e7b00-10c9-11eb-93e8-4827a60d0c6f.png)
+
+(Text added, adding a new tag)
+
+![image](https://user-images.githubusercontent.com/72612647/96357407-6f7f0b80-10c9-11eb-8b60-0929095ca8c0.png)
+
+(Note saved to database)
+
+![image](https://user-images.githubusercontent.com/72612647/96357416-7efe5480-10c9-11eb-8e60-d8e5510e79db.png)
+
+(Viewing the new note we created)
+
+
 Note: a note cannot be saved without any tags.
 
 ### Close 
