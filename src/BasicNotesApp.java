@@ -475,7 +475,7 @@ public class BasicNotesApp {
 						start=next;
 				}
 				else {
-					if(start==0) {
+					if(prev==0) {
 						tags.add(0, newTag);
 						done=true;
 					}
