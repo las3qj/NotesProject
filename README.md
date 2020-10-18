@@ -85,37 +85,105 @@ Note: the default dimensions are those for which it is optimized. It will scale 
 (App on startup)
 
 ### Categories
-What can you do with the categories panel (the leftmost panel containing the tree)? Selecting a category or tag will populate the middle panel (the selection panel) with notes associated with that tag or with all tags beneath that category. 
+What can you do with the categories panel (the leftmost panel containing the tree)? 
 
-Note: control-click and shift-click is supported for tag selections! Selecting multiple tags currently displays the Union of their corresponding notes.
+#### Selecting a tag
+Selecting a tag will populate the middle panel (the selection panel) with notes associated with that tag. 
 
 ![image](https://user-images.githubusercontent.com/72612647/96357331-70fc0400-10c8-11eb-9ba4-6cd4b40c0567.png)
 
 (Tag "Camus" selected)
 
+Note: control-click and shift-click is supported for tag selections! Selecting multiple tags currently displays the Union of their corresponding notes.
+
+#### Selecting a category
+Selecting a category will populate the middle panel (the selection panel) with notes associated with all tags under that category.
+
+![image](https://user-images.githubusercontent.com/72612647/96357657-d5b95d80-10cc-11eb-99f3-209315db27d9.png)
+
+(Category "Authors" select)
+
+#### Adding a new tag or category
 To add a new tag, simply navigate to the corresponding category and select the "add tag" option. The same is true for adding a new category.
 
+![image](https://user-images.githubusercontent.com/72612647/96357682-11542780-10cd-11eb-80a0-2860330e991a.png)
+
+(Adding a new author)
+
+![image](https://user-images.githubusercontent.com/72612647/96357706-51b3a580-10cd-11eb-89a7-f5470fb74c12.png)
+
+(Adding author "Faulkner")
+
+![image](https://user-images.githubusercontent.com/72612647/96357721-81fb4400-10cd-11eb-9cf9-8f7a2f6c219e.png)
+
+#### Deleting a tag
 To delete a tag, right click a tag and select "delete". Notice that in the corresponding selection panel and current note panel the deleted tag is removed. The same is true of categories.
+
+![image](https://user-images.githubusercontent.com/72612647/96357724-9b03f500-10cd-11eb-950c-8f930d0726f2.png)
+
+(Selecting Faulkner to delete)
+
+![image](https://user-images.githubusercontent.com/72612647/96357765-d0a8de00-10cd-11eb-807a-236e4f3e48e9.png)
+
+![image](https://user-images.githubusercontent.com/72612647/96357782-fb933200-10cd-11eb-9f8b-d7c6897b53c8.png)
+
+
+#### Deleting a category
+To delete a category, right click a category and select "delete". The selection panel and current note panel are both updated accordingly. Deleting a category also deletes all tags of that category!
+
+![image](https://user-images.githubusercontent.com/72612647/96357790-2e3d2a80-10ce-11eb-85f7-49bcac8414e9.png)
+
+![image](https://user-images.githubusercontent.com/72612647/96357797-4a40cc00-10ce-11eb-81ab-4744eea7eea0.png)
+
+![image](https://user-images.githubusercontent.com/72612647/96357805-63e21380-10ce-11eb-9669-c16467751e8e.png)
 
 ### Selecting Notes
 Once a category or tag has been selected, the middle panel will become populated with notes corresponding to that tag, category, or multiple selection. Selecting one of those notes will populate the rightmost panel (the current note panel) with the content of the note you selected.
 
 ![image](https://user-images.githubusercontent.com/72612647/96357342-a6a0ed00-10c8-11eb-9294-7339fbc3e79d.png)
 
-(Note selected)
-
+#### Deleting a note
 To delete a note, right click its preview in the selection panel and click "delete". The note will be removed from the selection panel, the current note panel (if applicable) and the database.
 
+![image](https://user-images.githubusercontent.com/72612647/96357836-b58a9e00-10ce-11eb-8785-50b2f31c97d1.png)
+
+![image](https://user-images.githubusercontent.com/72612647/96357851-c804d780-10ce-11eb-8677-2cc5b8d6ce7c.png)
+
+![image](https://user-images.githubusercontent.com/72612647/96357859-e539a600-10ce-11eb-90a2-deaa817307af.png)
+
 ### Current Note
+#### Editing existing note
 Once a note has been selected, its content can be changed and its tags can be edited. The top panel displays all current tags of the currently displayed note. To add a tag, simply click the "Add tag" button. 
 
+![image](https://user-images.githubusercontent.com/72612647/96357566-93435100-10cb-11eb-8224-d678dd0c59a8.png)
+
+Input the new tag name and select "ok" to add the tag. Note: the new tag must be an existing tag in the leftmost panel!
+
+![image](https://user-images.githubusercontent.com/72612647/96357585-df8e9100-10cb-11eb-8d50-3445b63959a9.png)
+
+Now the upper tag panel will be updated with this new tag!
+
+![image](https://user-images.githubusercontent.com/72612647/96357618-59bf1580-10cc-11eb-8aa0-d1d508ca1071.png)
+
 To delete a tag, right click a tag and select "delete". 
+
+![image](https://user-images.githubusercontent.com/72612647/96357608-34320c00-10cc-11eb-9168-d6b0be93a402.png)
+
+(Deleting the "Master Thinkers" tag)
+
+![image](https://user-images.githubusercontent.com/72612647/96357627-86732d00-10cc-11eb-9323-feb8497fe947.png)
+
+(Now deleted)
 
 To edit the content of the note, simply type away in the middle text area!
 
 To save the changes made to the note, click the save button in the bottom panel. Note the reflected changes in the selection panel!
+
+![image](https://user-images.githubusercontent.com/72612647/96357501-d9e47b80-10ca-11eb-96ef-88bd85610477.png)
+
 Note: changes to the note content or tags are not saved automatically, and must be manually saved from this button.
 
+#### Creating a new note
 To create a new note, select the "Create" button on the bottom panel. The panel will populate with an empty text area and an empty list of tags. Save the note to publish it and see reflected changes (if applicable) in the selection panel!
 
 ![image](https://user-images.githubusercontent.com/72612647/96357384-2e86f700-10c9-11eb-80bb-12c75ce110cc.png)
@@ -133,7 +201,6 @@ To create a new note, select the "Create" button on the bottom panel. The panel 
 ![image](https://user-images.githubusercontent.com/72612647/96357416-7efe5480-10c9-11eb-8e60-d8e5510e79db.png)
 
 (Viewing the new note we created)
-
 
 Note: a note cannot be saved without any tags.
 
