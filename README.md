@@ -80,6 +80,10 @@ Usage will focus on how to best interact with the user interface, and what tools
 The application will prompt for a proper location to create a database. To get a set of testing notes to allow quick familiarization with the environment, respond "yes" to the prompt concerning test data. Lastly, two prompts will request app dimensions, for which the application is scalable.
 Note: the default dimensions are those for which it is optimized. It will scale for other dimensions, and may work quite well for many, but the default is the current recommendation.
 
+![image](https://user-images.githubusercontent.com/72612647/96357292-18c50200-10c8-11eb-9cad-32c13c42ed9c.png)
+
+(App on startup)
+
 ### Categories
 What can you do with the categories panel (the leftmost panel containing the tree)? Selecting a category or tag will populate the middle panel (the selection panel) with notes associated with that tag or with all tags beneath that category.
 Note: control-click and shift-click is supported for tag selections! Selection multiple tags currently displays the Union of their corresponding notes.
