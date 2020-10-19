@@ -7,6 +7,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Vector;
 
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
 public class BasicNotesDB {
 	private int catTags;
 	private int noteTags;
@@ -247,7 +250,8 @@ public class BasicNotesDB {
             conn = DriverManager.getConnection(url);
             conn.setAutoCommit(false);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+        	JFrame f = new JFrame();
+            JOptionPane.showMessageDialog(f, "Failed to connect to db");
         }
         return conn;
     }

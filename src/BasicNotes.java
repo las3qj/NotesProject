@@ -1,5 +1,9 @@
 package basicNotes;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Vector;
 
 import javax.swing.JFrame;
@@ -11,7 +15,14 @@ public class BasicNotes {
 
 	public static void main(String[] args) {
 		JFrame f = new JFrame();
-		String path = "jdbc:sqlite:"+ JOptionPane.showInputDialog(f, "Database pathName", "C://sqlite/db");
+		String pathName = JOptionPane.showInputDialog(f, "Database pathName", "C://notesApp//db");
+		Path path = Paths.get(pathName);
+		String p1 = "jdbc:sqlite:";
+		try {
+			Files.createDirectories(path);
+		} catch (IOException e){
+			JOptionPane.showMessageDialog(f, "Failed to create directory");
+		}
 		int test = (JOptionPane.showConfirmDialog(f, "Load testing table?"));
 		String mes="Reset/clear data?";
 		if(test==0)
@@ -19,7 +30,7 @@ public class BasicNotes {
 		int reset = (JOptionPane.showConfirmDialog(f, mes));
 		if(path==null||test==3||reset==3)
 			return;
-		BasicNotesDB dataBase = new BasicNotesDB(path,test==0,reset==0);
+		BasicNotesDB dataBase = new BasicNotesDB(p1+pathName,test==0,reset==0);
 		
 			
 		//hard reset the tables
