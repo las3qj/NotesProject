@@ -43,7 +43,8 @@ public class BasicNotesApp {
 	JLabel sTag1, sTag2;*/
 	//JPanel sTagsPanel;
 	JLabel oneNote;
-	JPanel selectionPanel, sNotesPanel;
+	JPanel selectionPanel, sNotesPanel, sTopPanel;
+	JToggleButton unionButton, interButton;
 	JScrollPane sScrollPane;
 	
 	//currNotePanel components
@@ -61,6 +62,7 @@ public class BasicNotesApp {
 	Note currNote;
 	Vector<String> curTags;
 	Vector<String> categories;
+	boolean union;
 	
 	//final components
 	JPanel finalPanel;
@@ -180,22 +182,61 @@ public class BasicNotesApp {
 	 * creates JPanel selectionPanel and related components
 	 */
 	private void createSelectionPanel() {
+		//invoke helper function createSScrollPane() to create sNotesPanel and sScrollPane
+		createSScrollPane();
+		//invoke helper function createSTopPanel() to create sTopPanel and selectButton
+		createSTopPanel();
 		selectionPanel = new JPanel(new GridBagLayout());
+		GridBagConstraints s = new GridBagConstraints();
+		s.weightx=1;
+		//s.weighty=0.015;
+		s.fill = GridBagConstraints.BOTH;
+		s.anchor=GridBagConstraints.FIRST_LINE_START;
+		s.insets = new Insets(2,2,0,2);
+		selectionPanel.add(sTopPanel, s);
+		s.weighty=1;
+		s.gridy=1;
+		s.insets = new Insets(0,0,0,0);
+		selectionPanel.add(sScrollPane, s);
+		selectionPanel.setBackground(Color.white);
+	}
+	
+	/**
+	 * Create the topmost panel with button selectButton
+	 */
+	private void createSTopPanel() {
+		sTopPanel = new JPanel(new GridBagLayout());
+		GridBagConstraints bt = new GridBagConstraints();
+		bt.weightx=1;
+		bt.insets = new Insets(5,5,0,5);
+		bt.anchor = GridBagConstraints.LINE_END;
+		interButton = new JToggleButton("INTERSECTION", false);
+		interButton.addActionListener(bListener);
+		sTopPanel.add(interButton, bt);
+		bt.gridx=1;
+		bt.insets = new Insets(5,5,0,5);;
+		bt.anchor = GridBagConstraints.LINE_START;
+		unionButton = new JToggleButton("UNION", true);
+		unionButton.addActionListener(bListener);
+		sTopPanel.add(unionButton, bt);
+		sTopPanel.setMaximumSize(new Dimension((sScrollPane.getWidth()), 50));
+		sTopPanel.setBackground(Color.white);
+		union = true;
+	}
+	
+	/**
+	 * crates JScrollPane sScrollPane and its related components
+	 */
+	private void createSScrollPane() {
 		sNotesPanel = new JPanel();
 		sNotesPanel.setLayout(new BoxLayout(sNotesPanel, BoxLayout.PAGE_AXIS));
 		sNotesPanel.setBackground(Color.DARK_GRAY);
 		sScrollPane = new JScrollPane(sNotesPanel);
 		sScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		sScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		GridBagConstraints s = new GridBagConstraints();
-		s.weightx=1;
-		s.weighty=1;
-		s.fill = GridBagConstraints.BOTH;
-		s.anchor=GridBagConstraints.FIRST_LINE_START;
-		selectionPanel.add(sScrollPane, s);
 		sScrollPane.setAlignmentX(Component.LEFT_ALIGNMENT);
-		selectionPanel.setBackground(Color.white);
 	}
+
 	
 	/**
 	 * creates JPanel currNotePanel and related components
@@ -526,13 +567,16 @@ public class BasicNotesApp {
 	/**
 	 * Populate selectionPanel with the Notes in the Vector<Note> sNotes
 	 * @param sNotes - a Vector<Note> of notes to add to the selectionPanel
+	 * @param union - true if the union is requested, false if the intersection
 	 */
 	private void populateSNotes(Vector<String> tags) {
 		Vector<Note> notes = new Vector<Note>();
 		for(int i=0; i<tags.size(); i++) 
 			notes.addAll(dataBase.getNotesFromTag(tags.get(i)));
-		
-		notes= removeDuplicates(notes);
+		if(union)
+			notes= removeDuplicates(notes);
+		else
+			notes = intersection(notes, tags.size());
         sNotesPanel.removeAll();
         if(notes.size()==0) {
             selectionPanel.revalidate();
@@ -551,7 +595,7 @@ public class BasicNotesApp {
         	
         	NotePreview newNote = new NotePreview(notes.get(i));
         	wrapper.add(newNote,c);
-        	wrapper.setMaximumSize(new Dimension((int)(WIDTH*SELWEIGHT)-95, newNote.getPreferredSize().height+10));
+        	wrapper.setMaximumSize(new Dimension(sTopPanel.getWidth(), newNote.getPreferredSize().height+10));
         	wrapper.setAlignmentX(Component.LEFT_ALIGNMENT);
         	//sNotesPanel.add(Box.createHorizontalGlue());
            	sNotesPanel.add(wrapper);
@@ -655,6 +699,18 @@ public class BasicNotesApp {
     			Vector<String> tags = insertTag(currNote.getTags(),tag);
     			currNote.setTags(tags);
     			populateCNTags(tags);
+			}
+			//For unionButton
+			else if(e.getSource().equals(unionButton)) {
+				union = true;
+				interButton.setSelected(false);
+				populateSNotes(curTags);	
+			}
+			//For interButton
+			else if(e.getSource().equals(interButton)) {
+				union = false;
+				unionButton.setSelected(false);
+				populateSNotes(curTags);	
 			}
 			//For deleteItem
 			else if(e.getActionCommand().compareTo("Delete")==0) {
@@ -865,7 +921,7 @@ public class BasicNotesApp {
 		public NotePreview(Note n) {
 			note = new Note(n);
 			noteLabel = new JLabel("<html>"+note.getContent()+"</html>");
-			noteLabel.setPreferredSize(new Dimension((int)(SELWEIGHT*BasicNotesApp.WIDTH),(int)(BasicNotesApp.HEIGHT/8)));
+			noteLabel.setPreferredSize(new Dimension((int)(sTopPanel.getWidth()),(int)(BasicNotesApp.HEIGHT/8)));
 			this.setLayout(new GridBagLayout());
 			this.setBackground(Color.white);
 			GridBagConstraints nLConstraints  = new GridBagConstraints();
