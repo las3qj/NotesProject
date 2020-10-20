@@ -153,7 +153,7 @@ public class BasicNotesApp {
 	    frame.setSize(new Dimension(WIDTH, HEIGHT));
 	    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	    frame.setLocationRelativeTo(null);
-	    frame.setResizable(false);
+	    frame.setResizable(true);
 	    frame.setVisible(true);
 		
 	}
@@ -672,6 +672,11 @@ public class BasicNotesApp {
 				if(empty) {
 					JFrame f = new JFrame();
 					JOptionPane.showMessageDialog(f, "Add a tag before saving");
+				}
+				
+				else if(cNTextArea.getText().trim().equals("")) {
+					JFrame f = new JFrame();
+					JOptionPane.showMessageDialog(f, "Add content before saving");
 				}
 				
 				else if(currNote.getId()==-1) {
