@@ -26,39 +26,9 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
-/**
- * 
- * The immediate tasks to reconcile are as follows (in order of tackling, I think)
- * [X] 1. Implement an action listener for the tree so that the selectionPanel displays a note corresponding to the selected tag
- * [X] 2. Create a formatting system for the displayed note to fit into a horizontal constraint
- * [X] 3. Allow multiple notes to display when a tag is selected
- * [X] 4. Allow a category to be selected, displaying all notes from that category
- * [X] 4.b Allow a scrolling pane for notes while maintaining unity of size between notes
- * [X] 5. Allow multiple tags to be selected, or even multiple categories
- * [X] 6. Determine the nature of the double-click requirement
- * [X] 7. Allow a category to be selected
- * . . .
- * and so on and so forth
- * . . .
- * [X] 8. Allow categories in dataBase to have a greater number of tags
- * [X] 9. Allow adding of categories
- * [X] 10. Allow adding of tags
- * [X] 11. Require tags to be sorted alphabetically within notes and categories both
- * 12. Union and intersection
- * 13. Adjustable size!
- * . . .
- * [X] 9. Move on to the currentNote panel
- * . . .
- * m-1. Make the NotePreviews more [X] uniform and []visually appealing
- * [X] m. Organize the formatting and sizing of the app to be uniform across and between panels
- * . . .
- * Improve, improve, improve!
- */
-
-
 public class BasicNotesApp {
+	//database
 	BasicNotesDB dataBase;
-	Vector<String> categories;
 	
 	//categoryPanel components
 	JPanel intCatPanel;
@@ -87,8 +57,10 @@ public class BasicNotesApp {
 	JTextArea cNTextArea;
 	JPanel currNotePanel;
 	
+	//other objects
 	Note currNote;
 	Vector<String> curTags;
+	Vector<String> categories;
 	
 	//final components
 	JPanel finalPanel;
@@ -102,13 +74,19 @@ public class BasicNotesApp {
 	//Action listeners and tree listeners
 	basicListener bListener;
 	
-	//Final variables
+	//Static variables
 	static int WIDTH;
 	static int HEIGHT;
+	
+	//Final variables
 	final double CATWEIGHT=0.2;
 	final double SELWEIGHT=0.3;
 	final double CURWEIGHT=0.5;
 	
+	/**
+	 * Constructor, from which all else is called
+	 * @param db - the database to edit
+	 */
 	public BasicNotesApp(BasicNotesDB db){
 		JFrame f = new JFrame();
 		WIDTH = Integer.parseInt(JOptionPane.showInputDialog(f, "Requested app width", "1500"));
@@ -117,8 +95,7 @@ public class BasicNotesApp {
 		dataBase = db;
 		
 		bListener = new basicListener();
-		
-		//categoryPanel components (cComponents) are now instantiated
+
 		GridBagConstraints cConstraints = new GridBagConstraints();
 		cConstraints.gridx = 0;
 		cConstraints.gridy = 0;
@@ -128,8 +105,7 @@ public class BasicNotesApp {
 		cConstraints.anchor=GridBagConstraints.LINE_START;
 		//invoke createCategoryPanel() to create the categoryPanel
 		createCategoryPanel();
-		
-		//selectionPanel components (sComponents) are now now instantiated
+
 		GridBagConstraints sPConstraints = new GridBagConstraints();
 		sPConstraints.gridx = 1;
 		sPConstraints.gridy = 0;
@@ -139,8 +115,7 @@ public class BasicNotesApp {
 		sPConstraints.anchor=GridBagConstraints.CENTER;
 		//invoke createSelectionPanel() to create the selectionPanel
 		createSelectionPanel();
-				
-		//currNotePanel components (cNCompoonents) are now instantiated
+
 		GridBagConstraints cNPConstraints = new GridBagConstraints();
 		cNPConstraints.gridx = 2;
 		cNPConstraints.gridy = 0;
@@ -180,6 +155,8 @@ public class BasicNotesApp {
 	    frame.setVisible(true);
 		
 	}
+	
+	//------------------------------Sub-Panel Creation-----------------------------------------
 	/**
 	 * creates JPanel categoryPanel and related components
 	 */
@@ -319,6 +296,7 @@ public class BasicNotesApp {
 		cNBotPanel.setBackground(Color.DARK_GRAY);
 	}
 	
+	//------------------------------Other JComponent Creation-----------------------------------------
 	/**
 	 * instantiates the DeleteMenu
 	 */
@@ -380,6 +358,7 @@ public class BasicNotesApp {
 		intCatPanel.add(cTree, cTConstraints);
 	}
 	
+	//------------------------------Tree Helper Functions-----------------------------------------
 	/**
 	 * Add new tag to the tree and to the database
 	 * @param tag - the tag to be added to the tree and database
@@ -415,6 +394,7 @@ public class BasicNotesApp {
 		dataBase.addCategory(cat);
 	}
 	
+	//------------------------------Database Accessor-----------------------------------------
 	/**
 	 * Returns whether this tag is present in the categories table
 	 * @param tag - the tag to check
@@ -429,6 +409,7 @@ public class BasicNotesApp {
 		return false;
 	}
 	
+	//------------------------------Vector Manipulation Functions-----------------------------------------
 	/**
 	 * Using linked list and binary search, insert the newTag alphabetically
 	 * @param n - the note whose tags to alter
@@ -490,13 +471,67 @@ public class BasicNotesApp {
 	}
 	
 	/**
+	 * Removes all duplicate notes from the vector
+	 * @param notes - Vector<Note> to be checked
+	 * @return - Vector<Note> removed of any duplicates
+	 */
+	private Vector<Note> removeDuplicates(Vector<Note> notes){
+		Vector<Integer> ids = new Vector<Integer>();
+		for(int i=0; i<notes.size(); i++) {
+			boolean unique=true;
+			for(int j=0; j<ids.size(); j++) {
+				if(ids.get(j)==notes.get(i).getId()) {
+					notes.remove(i);
+					i--;
+					unique=false;
+					break;
+				}
+			}
+			if(unique)
+				ids.add(notes.get(i).getId());
+		}
+		return notes;
+	}
+	
+	/**
+	 * Returns the intersection of the two note vectors
+	 * @param n1 - the first note vector
+	 * @param n2 - the second note vector
+	 * @return
+	 */
+	private Vector<Note> intersection(Vector<Note> n1, int args){
+		Vector<Note> union = new Vector<Note>(n1);
+		//O(n) operation, at expense of memory
+		//First O(n) pass over the union to find the largest id
+		int max = 0;
+		for(Note n: union) 
+			if(n.getId()>max)
+				max = n.getId();
+		//create int array of that size
+		int ids[] = new int[max+1];
+		Vector<Note> ret = new Vector<Note>();
+		//Second O(n) pass over the union to fill int array and escape duplicates
+		for(Note n: union) {
+			int id = n.getId();
+			if(ids[id]==(args-1)) 
+				ret.add(n);
+			
+			else
+				ids[id]++;
+		}
+		return ret;
+	}
+	
+	//------------------------------Panel Update Functions-----------------------------------------
+	/**
 	 * Populate selectionPanel with the Notes in the Vector<Note> sNotes
 	 * @param sNotes - a Vector<Note> of notes to add to the selectionPanel
 	 */
 	private void populateSNotes(Vector<String> tags) {
 		Vector<Note> notes = new Vector<Note>();
-		for(int i=0; i<tags.size(); i++)
+		for(int i=0; i<tags.size(); i++) 
 			notes.addAll(dataBase.getNotesFromTag(tags.get(i)));
+		
 		notes= removeDuplicates(notes);
         sNotesPanel.removeAll();
         if(notes.size()==0) {
@@ -526,29 +561,7 @@ public class BasicNotesApp {
         selectionPanel.repaint();  
 	}
 	
-	/**
-	 * Removes all duplicate notes from the vector
-	 * @param notes - Vector<Note> to be checked
-	 * @return - Vector<Note> removed of any duplicates
-	 */
-	private Vector<Note> removeDuplicates(Vector<Note> notes){
-		Vector<Integer> ids = new Vector<Integer>();
-		for(int i=0; i<notes.size(); i++) {
-			boolean unique=true;
-			for(int j=0; j<ids.size(); j++) {
-				if(ids.get(j)==notes.get(i).getId()) {
-					notes.remove(i);
-					i--;
-					unique=false;
-					break;
-				}
-			}
-			if(unique)
-				ids.add(notes.get(i).getId());
-		}
-		return notes;
-	}
-	
+	//------------------------------Basic Action Listener Class and Methods---------------------------------------
 	/**
 	 * Currently examines the node last selected and sets the JLabel oneNote to be the text of the first note
 	 * with the corresponding tag (of the selected node)
@@ -592,6 +605,7 @@ public class BasicNotesApp {
 	        populateSNotes(curTags);
 	    }
 
+		
 		/**
 		 * If an action has been performed (button pressed)
 		 * Currently handles cNNew, cNSave, addTag
@@ -762,6 +776,10 @@ public class BasicNotesApp {
 			}
 		}
 		
+		/**
+		 * Populate the tags of the currentNote panel
+		 * @param tags - the tags to set in the panel
+		 */
 		private void populateCNTags (Vector<String> tags) {
 			cNTagPanel.removeAll();
 			//JPanel cNTags = new JPanel(new Flow)
@@ -785,8 +803,9 @@ public class BasicNotesApp {
 			currNotePanel.revalidate();
 			currNotePanel.repaint();
 		}
+		
 		/**
-		 * If there has been a mouseClick event (functioning for NotePreview classes)
+		 * If there has been a mouseClick event
 		 */
 		@Override
 		public void mouseClicked(MouseEvent click) {
@@ -838,6 +857,7 @@ public class BasicNotesApp {
 		
 	}
 	
+	//------------------------------NotePreview Private Class-----------------------------------------
 	private class NotePreview extends JPanel{
 		private Note note;
 		private JLabel noteLabel;
